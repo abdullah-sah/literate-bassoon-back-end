@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/abdullah-sah/literate-bassoon-back-end/issues"
   },
-  "homepage": "https://github.com/abdullah-sah/literate-bassoon-back-end#readme"
+  "homepage": "https://github.com/abdullah-sah/literate-bassoon-back-end#readme",
+  "devDependencies": {
+    "sequelize": "^6.25.8",
+    "sqlite3": "^5.1.2"
+  }
 }

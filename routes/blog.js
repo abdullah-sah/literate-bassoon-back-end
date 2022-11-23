@@ -6,6 +6,7 @@ const { Token, Blog, Post } = require('../models/index')
 
 // Import utils
 const generateURL = require("../utilities/generateURL")
+const generateToken = require("../utilities/generateToken")
 
 // Return all blogs that exist
 blogRouter.get("/", async (req, res) => {
@@ -42,6 +43,9 @@ blogRouter.get("/:blogname/", async (req, res) => {
 
 // Create a new blog post
 blogRouter.put("/:blogname/posts", async (req, res) => {
+
+        // TODO check token
+
         // Find the blog to add the post to, and create the post
         post = await Post.create({title: req.body.postTitle, content: req.body.postContent, creation_date: new Date()})
         target = await Blog.findOne({where: {name: req.params.blogname}})
@@ -52,6 +56,16 @@ blogRouter.put("/:blogname/posts", async (req, res) => {
         // Send response
         res.send({success: true})
 
+})
+
+// Given a token, return an address to their blog
+blogRouter.post("/loginStatus", async (req, res) => {
+    //TODO
+})
+
+// Log a user in to their blog
+blogRouter.post("/:blogname/login", async (req, res) => {
+    //TODO
 })
 
 

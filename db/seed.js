@@ -74,6 +74,4 @@ const seed = async () => {
 	}
 };
 
-(async () => await seed())();
-
 module.exports = seed;

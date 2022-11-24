@@ -79,7 +79,10 @@ blogRouter.put("/:blogname/posts", async (req, res) => {
 // Given a token, return an address to their blog.
 blogRouter.post("/loginStatus", async (req, res) => {
     const userToken = await Token.findOne({where: {token: req.body.token}})
-    const userBlog = await userToken.getBlog()
+
+    if(userToken !== null){
+        const userBlog = await userToken.getBlog()
+    }
 
     if ((userToken == null) || (userBlog == null)) {
         res.send({success: false, error: "No blog with that token"})

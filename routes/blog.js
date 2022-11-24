@@ -55,6 +55,10 @@ blogRouter.put("/:blogname/posts", async (req, res) => {
  
         // Check token
         const requestedBlog = await Blog.findOne({where: {name: req.params.blogname}})
+
+        if (requestedBlog == null) {
+            res.send({})
+        }
         const blogTokens = await requestedBlog.getTokens()
         const tokens = blogTokens.find(element => {
             return element.toJSON().token === req.body.token
@@ -155,7 +159,6 @@ blogRouter.delete("/:blogname/posts/:postID", async (req, res) => {
 
     // Successful!
     res.send({success: true})
-
 })
 
 

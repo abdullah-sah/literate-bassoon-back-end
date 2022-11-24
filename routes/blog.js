@@ -21,27 +21,27 @@ blogRouter.get("/", async (req, res) => {
 // Create a new blog
 blogRouter.put("/", async (req, res) => {
     try {
-        // Generate a URL, then create a new blog database entry 
+        // Generate a URL, then create a new blog database entry
         url = generateURL(req.body.blogTitle)
         const newBlog = await Blog.create({name: req.body.blogTitle, password: req.body.password, address: url})
-        
+
         // Generate a token for this user, and associate the blog with the token
         const generatedToken = generateToken()
         newToken = await Token.create({token: generatedToken})
-        
+
         await newBlog.addToken(newToken)
 
         res.send({success: true, blogAddress: url, token: generatedToken})
     } catch (err) {
         res.send({success: false, error: err})
     }
-    
+
 })
 
 // Get all posts from a given blog
 blogRouter.get("/:blogname/", async (req, res) => {
     try {
-        target = await Blog.findOne({where: {name: req.params.blogname}, include: Token})
+        target = await Blog.findOne({where: {address: req.params.blogname}, include: Token})
         query = await target.getPosts()
         res.send({success: true, posts: query})
     } catch {
@@ -51,9 +51,9 @@ blogRouter.get("/:blogname/", async (req, res) => {
 
 // Create a new blog post
 blogRouter.put("/:blogname/posts", async (req, res) => {
- 
+
         // Check token
-        const requestedBlog = await Blog.findOne({where: {name: req.params.blogname}})
+        const requestedBlog = await Blog.findOne({where: {address: req.params.blogname}})
 
         if (requestedBlog == null) {
             res.send({success: false, error: "Blog not found."})
@@ -63,7 +63,7 @@ blogRouter.put("/:blogname/posts", async (req, res) => {
         const tokens = blogTokens.find(element => {
             return element.toJSON().token === req.body.token
         })
-        
+
         // Empty array -> Unauthorized, non empty array -> Authorized
         if (tokens == null ) { res.send({success: false, error: "Unauthorized."}) }
 
@@ -78,7 +78,10 @@ blogRouter.put("/:blogname/posts", async (req, res) => {
 // Given a token, return an address to their blog.
 blogRouter.post("/loginStatus", async (req, res) => {
     const userToken = await Token.findOne({where: {token: req.body.token}})
-    const userBlog = await userToken.getBlog()
+
+    if(userToken !== null){
+        const userBlog = await userToken.getBlog()
+    }
 
     if ((userToken == null) || (userBlog == null)) {
         res.send({success: false, error: "No blog with that token"})
@@ -90,7 +93,7 @@ blogRouter.post("/loginStatus", async (req, res) => {
 
 // Log a user in to their blog.
 blogRouter.post("/:blogname/login", async (req, res) => {
-    const userBlog = await Blog.findOne({ where:{name: req.params.blogname}})
+    const userBlog = await Blog.findOne({ where:{address: req.params.blogname}})
 
     // Blog not found
     if (userBlog == null) {
@@ -115,13 +118,13 @@ blogRouter.post("/:blogname/login", async (req, res) => {
 
 // Delete a blog (and therefore all its associated posts and tokens)
 blogRouter.delete("/:blogname", async (req, res) => {
-    const userBlog = await Blog.findOne({where:{name: req.params.blogname}})
+    const userBlog = await Blog.findOne({where:{address: req.params.blogname}})
 
     if (userBlog == null) {
         res.send({success: false, error: "Blog not found"})
         return
     }
-    
+
     const userPosts = await userBlog.getPosts()
     const userTokens = await userBlog.getTokens()
 
@@ -143,7 +146,7 @@ blogRouter.delete("/:blogname", async (req, res) => {
 
 // Delete a post from a given blog
 blogRouter.delete("/:blogname/posts/:postID", async (req, res) => {
-    const userBlog = await Blog.findOne({where:{name: req.params.blogname}})
+    const userBlog = await Blog.findOne({where:{address: req.params.blogname}})
 
     if (userBlog == null) {
         res.send({success: false, error: "Blog not found"})

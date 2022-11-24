@@ -58,12 +58,12 @@ blogRouter.put("/:blogname/posts", async (req, res) => {
 
 })
 
-// Given a token, return an address to their blog
+// Given a token, return an address to their blog.
 blogRouter.post("/loginStatus", async (req, res) => {
     //TODO
 })
 
-// Log a user in to their blog
+// Log a user in to their blog.
 blogRouter.post("/:blogname/login", async (req, res) => {
     //TODO
 })

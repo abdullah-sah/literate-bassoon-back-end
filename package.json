@@ -19,5 +19,8 @@
   "devDependencies": {
     "sequelize": "^6.25.8",
     "sqlite3": "^5.1.2"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
   }
 }

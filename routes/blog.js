@@ -57,7 +57,8 @@ blogRouter.put("/:blogname/posts", async (req, res) => {
         const requestedBlog = await Blog.findOne({where: {name: req.params.blogname}})
 
         if (requestedBlog == null) {
-            res.send({})
+            res.send({success: false, error: "Blog not found."})
+            return
         }
         const blogTokens = await requestedBlog.getTokens()
         const tokens = blogTokens.find(element => {
@@ -65,14 +66,11 @@ blogRouter.put("/:blogname/posts", async (req, res) => {
         })
         
         // Empty array -> Unauthorized, non empty array -> Authorized
-        if (tokens.length === 0) { throw "Unauthorized" }
+        if (tokens == null ) { res.send({success: false, error: "Unauthorized."}) }
 
-        // Find the blog to add the post to, and create the post
+        // Create the post and add it to the blog
         const post = await Post.create({title: req.body.postTitle, content: req.body.postContent, creation_date: new Date()})
-        const target = await Blog.findOne({where: {name: req.params.blogname}})
-
-        // Add the post to the blog
-        await target.addPost(post)
+        await requestedBlog.addPost(post)
 
         // Send response
         res.send({success: true})

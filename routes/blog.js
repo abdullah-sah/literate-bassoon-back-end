@@ -43,8 +43,16 @@ blogRouter.get("/:blogname/", async (req, res) => {
 
 // Create a new blog post
 blogRouter.put("/:blogname/posts", async (req, res) => {
-
-        // TODO check token
+    try {
+        // Check token
+        blog = await Blog.findOne({where: {name: req.params.blogname}})
+        blogTokens = await blog.getTokens()
+        tokens = blogTokens.find(element => {
+            element.token == req.body.token
+        })
+        
+        // Empty array -> Unauthorized, non empty array -> Authorized
+        if (tokens.length == 0) { throw "Unauthorized" }
 
         // Find the blog to add the post to, and create the post
         post = await Post.create({title: req.body.postTitle, content: req.body.postContent, creation_date: new Date()})
@@ -55,7 +63,9 @@ blogRouter.put("/:blogname/posts", async (req, res) => {
 
         // Send response
         res.send({success: true})
-
+    } catch (err) {
+        res.send({success: false, error:err})
+    }
 })
 
 // Given a token, return an address to their blog.

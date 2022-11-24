@@ -76,12 +76,86 @@ blogRouter.put("/:blogname/posts", async (req, res) => {
 
 // Given a token, return an address to their blog.
 blogRouter.post("/loginStatus", async (req, res) => {
-    //TODO
+    const userToken = await Token.findOne({where: {token: req.body.token}})
+    const userBlog = await userToken.getBlog()
+
+    res.send({success: true, blogAddress: userBlog.address})
 })
 
 // Log a user in to their blog.
 blogRouter.post("/:blogname/login", async (req, res) => {
-    //TODO
+    const userBlog = await Blog.findOne({ where:{name: req.params.blogname}})
+
+    // Blog not found
+    if (userBlog == null) {
+        res.send({success: false, error: "Blog not found"})
+        return
+    }
+
+    // Correct password
+     if (req.body.password === userBlog.password) {
+        const newtoken = generateToken()
+        dbtoken = Token.create({token:newtoken})
+        userBlog.addToken(dbtoken)
+        res.send({success: true, token:newtoken})
+     }
+
+     // Incorrect password
+     else {
+        res.send({success:false, error: "Incorrect password"})
+        return
+     }
+})
+
+// Delete a blog (and therefore all its associated posts and tokens)
+blogRouter.delete("/:blogname", async (req, res) => {
+    const userBlog = await Blog.findOne({where:{name: req.params.blogname}})
+
+    if (userBlog == null) {
+        res.send({success: false, error: "Blog not found"})
+        return
+    }
+    
+    const userPosts = await userBlog.getPosts()
+    const userTokens = await userBlog.getTokens()
+
+    // Delete all posts and tokens, and then, delete the blog
+    userPosts.forEach(post => {
+        post.destroy()
+    })
+
+    userTokens.forEach(token => {
+        token.destroy()
+    })
+
+    userBlog.destroy()
+
+    // Successful!
+    res.send({success: true})
+
+})
+
+// Delete a post from a given blog
+blogRouter.delete("/:blogname/posts/:postID", async (req, res) => {
+    const userBlog = await Blog.findOne({where:{name: req.params.blogname}})
+
+    if (userBlog == null) {
+        res.send({success: false, error: "Blog not found"})
+        return
+    }
+
+    const userPost = await userBlog.getPost({where: {id: req.params.postID}})
+
+    if (userPost == null) {
+        res.send({success: false, error: "Post not found"})
+        return
+    }
+
+    userPost.destroy()
+
+    // Successful!
+    res.send({success: true})
+
 })
 
 

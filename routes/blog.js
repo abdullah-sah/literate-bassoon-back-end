@@ -27,12 +27,11 @@ blogRouter.put("/", async (req, res) => {
         
         // Generate a token for this user, and associate the blog with the token
         const generatedToken = generateToken()
-        console.log(generatedToken)
         newToken = await Token.create({token: generatedToken})
         
         await newBlog.addToken(newToken)
 
-        res.send({success: true, blogAddress: url})
+        res.send({success: true, blogAddress: url, token: generatedToken})
     } catch (err) {
         res.send({success: false, error: err})
     }

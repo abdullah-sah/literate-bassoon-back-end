@@ -119,6 +119,7 @@ blogRouter.post("/:blogname/login", async (req, res) => {
   // Blog not found
   if (userBlog == null) {
     res.send({ success: false, error: "Blog not found" });
+    return;
   }
 
   // Correct password

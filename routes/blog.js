@@ -81,6 +81,11 @@ blogRouter.post("/loginStatus", async (req, res) => {
     const userToken = await Token.findOne({where: {token: req.body.token}})
     const userBlog = await userToken.getBlog()
 
+    if ((userToken == null) || (userBlog == null)) {
+        res.send({success: false, error: "No blog with that token"})
+        return
+    }
+
     res.send({success: true, blogAddress: userBlog.address})
 })
 

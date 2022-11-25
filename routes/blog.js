@@ -66,32 +66,37 @@ blogRouter.put("/:blogname/posts", async (req, res) => {
     res.send({ success: false, error: "Blog not found." });
     return;
   }
-  const blogTokens = await requestedBlog.getTokens();
-  const tokens = blogTokens.find((element) => {
-    return element.toJSON().token === req.body.token;
+
+  const blog = await Token.findOne({
+    where: {
+      token: req.body.token,
+    },
   });
 
-  // Empty array -> Unauthorized, non empty array -> Authorized
-  if (tokens == null) {
+  if (blog.BlogId != requestedBlog.id) {
     res.send({ success: false, error: "Unauthorized." });
+    return;
   }
 
   // Create the post and add it to the blog
-  const post = await Post.create({
-    title: req.body.postTitle,
-    content: req.body.postContent,
-    creation_date: new Date(),
-  });
-  await requestedBlog.addPost(post);
-
-  // Send response
-  res.send({ success: true });
+  try {
+    const post = await Post.create({
+      title: req.body.postTitle,
+      content: req.body.postContent,
+      creation_date: new Date(),
+    });
+    await requestedBlog.addPost(post);
+    res.send({ success: true });
+  } catch {
+    res.send({ success: false });
+  }
 });
 
 // Given a token, return an address to their blog.
 blogRouter.post("/loginStatus", async (req, res) => {
   let userBlog;
   let userToken = await Token.findOne({ where: { token: req.body.token } });
+  console.log(`incoming token: ${req.body.token}`);
 
   if (userToken !== null) {
     userBlog = await userToken.getBlog();
@@ -120,7 +125,7 @@ blogRouter.post("/:blogname/login", async (req, res) => {
   // Correct password
   if (req.body.password === userBlog.password) {
     const newtoken = generateToken();
-    dbtoken = Token.create({ token: newtoken });
+    dbtoken = await Token.create({ token: newtoken });
     userBlog.addToken(dbtoken);
     res.send({ success: true, token: newtoken });
   }

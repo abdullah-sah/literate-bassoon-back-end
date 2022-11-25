@@ -14,7 +14,6 @@ Post.init(
     title: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
     },
     creation_date: {
       type: DataTypes.DATE,

@@ -8,6 +8,16 @@ const { Token, Blog, Post } = require("../models/index");
 const generateURL = require("../utilities/generateURL");
 const generateToken = require("../utilities/generateToken");
 
+// Return specific blog given blogId
+blogRouter.get('/blogId/:blogId', async (req, res) => {
+  try {
+    const query = await Blog.findOne({ where: { id: req.params.blogId } });
+    res.send({ success: true, blog: query });
+  } catch (err) {
+    res.send({ success: false, error: "err" });
+  }
+})
+
 // Return all blogs that exist
 blogRouter.get("/", async (req, res) => {
   try {
@@ -17,6 +27,16 @@ blogRouter.get("/", async (req, res) => {
     res.send({ success: false });
   }
 });
+
+// Return all posts that exist
+blogRouter.get('/posts/', async (req, res) => {
+  try {
+    const query = await Post.findAll();
+    res.send({ success: true, posts: query });
+  } catch (err)  {
+    res.send({ success: false, error: err });
+  }
+})
 
 // Create a new blog
 blogRouter.put("/", async (req, res) => {

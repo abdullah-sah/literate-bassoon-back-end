@@ -177,7 +177,11 @@ blogRouter.delete("/:blogname/posts/:postID", async (req, res) => {
     return;
   }
 
-  const userPost = await userBlog.getPost({ where: { id: req.params.postID } });
+  const userPost = (
+    await userBlog.getPosts({
+      where: { id: req.params.postID },
+    })
+  )[0];
 
   if (userPost == null) {
     res.send({ success: false, error: "Post not found" });
@@ -187,6 +191,43 @@ blogRouter.delete("/:blogname/posts/:postID", async (req, res) => {
   userPost.destroy();
 
   // Successful!
+  res.send({ success: true });
+});
+
+// update a post content
+blogRouter.put("/:blogname/posts/:postID", async (req, res) => {
+  const userBlog = await Blog.findOne({
+    where: { address: req.params.blogname },
+  });
+
+  if (userBlog == null) {
+    res.send({ success: false, error: "Blog not found" });
+    return;
+  }
+
+  const userPost = (
+    await userBlog.getPosts({
+      where: { id: req.params.postID },
+    })
+  )[0];
+
+  if (userPost == null) {
+    res.send({ success: false, error: "Post not found" });
+    return;
+  }
+
+  await Post.update(
+    {
+      title: req.body.postTitle,
+      content: req.body.postContent,
+    },
+    {
+      where: {
+        id: userPost.id,
+      },
+    }
+  );
+
   res.send({ success: true });
 });
 

@@ -48,7 +48,7 @@ blogRouter.get("/:blogname/", async (req, res) => {
       where: { address: req.params.blogname },
       include: Token,
     });
-    query = await target.getPosts();
+    query = await target.getPosts({ order: [["updatedAt", "DESC"]] });
     res.send({ success: true, posts: query, blogTitle: target.name });
   } catch {
     res.send({ success: false, error: "Something went wrong." });
